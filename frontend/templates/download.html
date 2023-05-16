@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File Downloader</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    /* Custom styles */
+    table {
+      width: 100%;
+    }
+    tr:hover {
+        background-color: #f5f5f5;
+        cursor: pointer;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1 class="mt-5">File Downloader</h1>
+    <table class="table table-bordered mt-3" id="fileTable">
+      <thead class="thead-light">
+        <tr>
+          <th>File ID</th>
+          <th>File Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Table rows will be dynamically populated here -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    var fileList = []; // Initialize an empty array to store the file IDs and names
+
+    // Make a GET request to retrieve the file IDs and names
+    $.ajax({
+      url: "http://localhost:8001/storage/get_all_files_id",
+      type: "GET",
+      dataType: "json",
+      success: function (response) {
+        fileList = response.files; // Assign the retrieved file IDs and names to the fileList array
+
+        var tableBody = $("#fileTable tbody");
+
+        // Populate the table with file IDs and names
+        fileList.forEach(function (file) {
+          var row = $("<tr>").appendTo(tableBody);
+          $("<td>").text(file.id).appendTo(row);
+          $("<td>").text(file.name).appendTo(row);
+
+          // Add click event listener to each row for file download
+          row.on("click", function () {
+            var fileId = file.id;
+            var downloadUrl =
+              "http://localhost:8001/storage/get_file?id=" + fileId;
+            window.location.href = downloadUrl;
+          });
+        });
+      },
+      error: function (xhr, status, error) {
+        console.log("An error occurred while retrieving the file IDs and names.");
+        console.log(error);
+      },
+    });
+  </script>
+</body>
+</html>
