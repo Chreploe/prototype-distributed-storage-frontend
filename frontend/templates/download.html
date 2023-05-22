@@ -16,54 +16,40 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
+  {% include 'navbar.html' %}
   <div class="container">
     <h1 class="mt-5">File Downloader</h1>
+    {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+      </div>
+      {% endfor %}
+    {% endif %}
     <table class="table table-bordered mt-3" id="fileTable">
       <thead class="thead-light">
         <tr>
           <th>File ID</th>
           <th>File Name</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
         <!-- Table rows will be dynamically populated here -->
+        {% for file in files %}
+        <tr>
+          <td>{{ file.id }}</td>
+          <td>{{ file.name }}</td>
+          <td><a href="/download/{{ file.id }}" target="_blank"><button class="btn btn-primary">Download</button></a></td>
+        </tr>
+        {% endfor %}
       </tbody>
     </table>
+    <div>
+      {% if selected_backend %}
+        <p>Selected backend: {{ selected_backend }}</p>
+      {% endif %}
+    </div>
   </div>
-
-  <script>
-    var fileList = []; // Initialize an empty array to store the file IDs and names
-
-    // Make a GET request to retrieve the file IDs and names
-    $.ajax({
-      url: "http://localhost:8001/storage/get_all_files_id",
-      type: "GET",
-      dataType: "json",
-      success: function (response) {
-        fileList = response.files; // Assign the retrieved file IDs and names to the fileList array
-
-        var tableBody = $("#fileTable tbody");
-
-        // Populate the table with file IDs and names
-        fileList.forEach(function (file) {
-          var row = $("<tr>").appendTo(tableBody);
-          $("<td>").text(file.id).appendTo(row);
-          $("<td>").text(file.name).appendTo(row);
-
-          // Add click event listener to each row for file download
-          row.on("click", function () {
-            var fileId = file.id;
-            var downloadUrl =
-              "http://localhost:8001/storage/get_file?id=" + fileId;
-            window.location.href = downloadUrl;
-          });
-        });
-      },
-      error: function (xhr, status, error) {
-        console.log("An error occurred while retrieving the file IDs and names.");
-        console.log(error);
-      },
-    });
-  </script>
 </body>
 </html>
