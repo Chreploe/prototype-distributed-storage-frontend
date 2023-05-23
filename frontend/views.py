@@ -8,6 +8,9 @@ from django.shortcuts import redirect
 import time
 from django.contrib import messages
 
+def index_view(request):
+    return redirect('/download')
+
 def upload_view(request):
     if request.method == 'GET':
         return render(request, 'upload.html')
@@ -38,14 +41,19 @@ def download_view(request):
             files = response_data['data']
             context['files'] = files
             context['selected_backend'] = selected_backend
-            print(files)
-        return render(request, 'download.html', context)
+            return render(request, 'download.html', context)
+        return HttpResponse('Service Unavailable', status=503)
     return HttpResponse('Service Unavailable', status=503)
 
 def download_file(request, id):
     selected_backend = select_backend()
     print(selected_backend)
     if selected_backend:
+        for i in range(60):
+            time.sleep(1)
+            response = requests.get(selected_backend + f'/storage/get-file/{id}')
+            if response.status_code == 200:
+                break
         return redirect(selected_backend + '/storage/get-file/' + id)
     return HttpResponse('Service Unavailable', status=503)
 
